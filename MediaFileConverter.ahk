@@ -15,7 +15,7 @@
  * github.com/akcansoft
  * ---------------------------
  * v1.0 R13
- * 04/04/2025
+ * 05/04/2025
  ***************************/
 
 #Requires AutoHotkey v2.0
@@ -29,11 +29,11 @@ cancelConvert := false ; Flag to cancel conversion
 appName := "FFmpeg Media File Converter"
 appVer := "v1.0"
 
-; Main g creation
+; ---- Main gui ------------------
 g1 := Gui("+Resize", appName)
 g1.MarginX := g1.MarginY := margin
 
-; ListView
+; --- ListView ---
 LV1 := g1.AddListView("xm ym h" g1Dim.h - 140, ["File Path", "File Name"])
 LV1.OnEvent("ItemSelect", UpdateButtons)
 LV1.OnEvent("ContextMenu", ShowContextm)
@@ -63,23 +63,27 @@ btnConvert.OnEvent("Click", ConvertFiles)
 btnExit := g1.AddButton("x+300", "&Close")
 btnExit.OnEvent("Click", g1Close)
 
-; Gui 1 Status Bar
+; --- Status Bar ---
 SB := g1.AddStatusBar()
 SB.SetText("You can drag and drop files.")
 
+; --- Events ---
 g1.OnEvent("DropFiles", DropFiles) ; File drag and drop
 g1.OnEvent("Size", g1Size) ; Resize event
 g1.OnEvent("Close", g1Close) ; Close event
 
+; --- Menu ---
 fileMenu := Menu() ; Main menu
-AddMenuItems(FileMenu)
+AddMenuItems(fileMenu)
+fileMenu.Add() ; Separator
+fileMenu.Add("&Exit", g1Close)
 rcMenu := Menu() ; Context menu
 AddMenuItems(rcMenu)
-HelpMenu := Menu() ; Help menu
-HelpMenu.Add("&About", About)
+helpMenu := Menu() ; Help menu
+helpMenu.Add("&About", About)
 Menus := MenuBar() ; Menu bar
-Menus.Add("&File", FileMenu)
-Menus.Add("&Help", HelpMenu)
+Menus.Add("&File", fileMenu)
+Menus.Add("&Help", helpMenu)
 g1.MenuBar := Menus
 
 ; --------- Status gui -----------------------
@@ -96,6 +100,7 @@ g2.OnEvent("Size", g2Size)
 ;g2.Show(" w" g2Width " h" g2Height)
 ;--------------------------------------------
 
+; --- Hotkeys ---
 #HotIf WinActive("ahk_id " g1.Hwnd)
 Del:: RemoveSelected()
 Insert:: AddFiles()
