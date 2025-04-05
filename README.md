@@ -13,7 +13,7 @@ FFmpeg Media File Converter is a user-friendly application built with AutoHotkey
 - **Cancel Ongoing Conversions**: Stop the conversion process at any time.
 
 ## Requirements
-
+  
 - **FFmpeg**: Ensure FFmpeg is installed on your system. You can download it from [FFmpeg.org](https://ffmpeg.org/).
 - **AutoHotkey v2.0**: This application requires AutoHotkey v2.0. Download it from [AutoHotkey.com](https://www.autohotkey.com/).
 
@@ -26,7 +26,7 @@ FFmpeg Media File Converter is a user-friendly application built with AutoHotkey
 
 ## Usage
 
-1. Launch the application by running the `FFmpegConverter.ahk` script.
+1. Launch the application by running the `MediaFileConverter.ahk` script.
 2. Drag and drop media files into the application or use the "Add File" button to select files.
 3. Specify the FFmpeg executable path if it is not already set.
 4. Customize the FFmpeg parameters and output file extension as needed.
