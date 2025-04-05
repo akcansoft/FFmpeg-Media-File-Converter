@@ -21,14 +21,12 @@ FFmpeg Media File Converter is a user-friendly application built with AutoHotkey
 
 ## Installation
 
-1. Download or clone this repository.
+1. Download `MediaFileConverter.exe` file
 2. Ensure FFmpeg is installed and note its file path (e.g., `C:\Program Files\FFmpeg\bin\ffmpeg.exe`).
-3. Install AutoHotkey v2.0 if not already installed.
-4. Run the `MediaFileConverter.ahk` script using AutoHotkey.
 
 ## Usage
 
-1. Launch the application by running the `MediaFileConverter.ahk` script.
+1. Launch the application by running the `MediaFileConverter.exe` file.
 2. Drag and drop media files into the application or use the "Add File" button to select files.
 3. Specify the FFmpeg executable path if it is not already set.
 4. Customize the FFmpeg parameters and output file extension as needed.
@@ -37,7 +35,7 @@ FFmpeg Media File Converter is a user-friendly application built with AutoHotkey
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU AFFERO GENERAL PUBLIC License. See the [LICENSE](LICENSE) file for details.
 
 ## Author
 
