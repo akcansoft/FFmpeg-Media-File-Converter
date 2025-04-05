@@ -14,7 +14,7 @@
  * mesutakcan.blogspot.com
  * github.com/akcansoft
  * ---------------------------
- * v1.0 R13
+ * v1.0 R14
  * 05/04/2025
  ***************************/
 
@@ -97,6 +97,7 @@ btnOK := g2.AddButton("xm y+10", "Cancel")
 btnOK.OnEvent("Click", g2btnCancelCloseClick)
 SB2 := g2.AddStatusBar()
 g2.OnEvent("Size", g2Size)
+g2.OnEvent("Close", g2Close) ; Close event
 ;g2.Show(" w" g2Width " h" g2Height)
 ;--------------------------------------------
 
@@ -175,7 +176,7 @@ ClearList(*) {
 ; Adds files to the ListView using a file selection dialog.
 AddFiles(*) {
   g1.Opt("+OwnDialogs")
-  selectedFiles := FileSelect("M3", , "Select File") ;, mediaFilter)
+  selectedFiles := FileSelect("M3", , "Select File")
   if !selectedFiles
     return
 
@@ -223,17 +224,23 @@ g1Close(*) {
 ; Close the status GUI and cancel the conversion if necessary.
 g2btnCancelCloseClick(*) {
   global cancelConvert
-  ; cancel
+  ; Cancel button
   if btnOK.Text != "Close" {
     cancelConvert := true
     return
   }
 
-  ; Close
+  ; Close button
+  g2Close()
+}
+
+g2Close(*){
   cancelConvert := false
   btnOK.Text := "Cancel"
-  LV2.Delete()
-  g2.Hide()
+  LV2.Delete() ; Clear the status ListView
+  g2.Hide() ; Hide the status window
+  g1.Opt("-Disabled") ; Enable the main window
+  g1.Show() ; Show the main window
 }
 
 ; Converts files using FFmpeg based on the selected parameters.
@@ -245,9 +252,10 @@ ConvertFiles(*) {
     return
   }
 
-  g2.Show()
-  g2.Opt("+OwnDialogs")
-
+  g2.Show() ; Show the status window
+  g2.Opt("+OwnDialogs") ; Allow the status window to own dialogs
+  g2.Opt('+Owner' g1.hwnd) ; Set the owner of the status window to the main window
+  g1.Opt('+Disabled') ; Disable the main window
   convertedCount := 0
   failedCount := 0
   totalFiles := LV1.GetCount()
@@ -257,15 +265,15 @@ ConvertFiles(*) {
   }
   parameter := " " Trim(parameterEdit.Text) " "
 
-  loop totalFiles {
+  loop totalFiles { ; Loop through all files in the ListView
     if cancelConvert {
       btnOK.Text := "Close"
       cancelConvert := false
       SB2.SetText("Conversion was canceled by the user.")
       return
     }
-    LV1.Modify(0, "-Select")
-    LV1.Modify(A_Index, "Select Vis")
+    LV1.Modify(0, "-Select") ; Deselect all items
+    LV1.Modify(A_Index, "Select Vis") ; Select the current item
 
     fileDir := LV1.GetText(A_Index, 1)
     fileName := LV1.GetText(A_Index, 2)
@@ -275,7 +283,7 @@ ConvertFiles(*) {
     outputFile := fileDir "\" fName ext
 
     UpdateProgress(A_Index, totalFiles)
-    if FileExist(inputFile) {
+    if FileExist(inputFile) { ; Check if the input file exists
       if !FileExist(outputFile) {
         cmd := '"' ffmpegPath '" -i "' inputFile '"' parameter '"' outputFile '"'
         rowIndex := LV2.GetCount()
