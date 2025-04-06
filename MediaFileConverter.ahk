@@ -1,23 +1,17 @@
-/*****************************
- * FFmpeg Media File Converter
- * ***************************
- * It allows users to select media files, specify FFmpeg parameters,
- * and convert files to a desired format using FFmpeg. 
- * The application supports drag-and-drop functionality,
- * a resizable interface, and a status window to monitor conversion progress. 
- * Users can manage the file list, configure output settings,
- * and cancel ongoing conversions if needed.
- * ---------------------------
- * Mesut Akcan
- * makcan@gmail.com
- * youtube.com/mesutakcan
- * mesutakcan.blogspot.com
- * github.com/akcansoft
- * ---------------------------
- * v1.0 R14
- * 05/04/2025
- ***************************/
-
+/*
+FFmpeg Media File Converter
+Open source utility that converts media files using FFmpeg.
+=============================
+Mesut Akcan
+makcan@gmail.com
+youtube.com/mesutakcan
+mesutakcan.blogspot.com
+github.com/akcansoft
+=============================
+v1.0 R16
+06/04/2025
+=============================
+*/
 #Requires AutoHotkey v2.0
 
 FFMpegPath := "C:\Program Files\FFmpeg\bin\ffmpeg.exe"
@@ -39,17 +33,20 @@ LV1.OnEvent("ItemSelect", UpdateButtons)
 LV1.OnEvent("ContextMenu", ShowContextm)
 
 ; FFmpeg selection
-FFmpegTxt := g1.AddText("xm y+10", "FFmpeg.exe:")
-FFmpegEdit := g1.AddEdit("x+10 w350", FFMpegPath)
+txtFFmpeg := g1.AddText("xm y+10", "FFmpeg.exe:")
+edtFFmpeg := g1.AddEdit("x+10 w350", FFMpegPath)
 
 btnBrowse := g1.AddButton("x+10", "...")
 btnBrowse.OnEvent("Click", BrowseFFmpeg)
 
-parameterTxt := g1.AddText("xm y+15", "FFmpeg Parameters:")
-parameterEdit := g1.AddEdit("x+10 yp-5 w200", "-acodec pcm_s16le")
+txtFFmpegParams := g1.AddText("xm y+15", "FFmpeg Parameters:")
+edtFFmpegParams := g1.AddEdit("x+10 yp-5 w200", "-acodec pcm_s16le")
 
-outputExtTxt := g1.AddText("x+10 yp+5", "Output Extension:")
-outputExtEdit := g1.AddEdit("x+10 yp-5", "wav")
+btnFFmpegHlp := g1.AddButton("x+1", "?") ; Help button for FFmpeg
+btnFFmpegHlp.OnEvent("Click", (*) => Run("https://ffmpeg.org/ffmpeg.html"))
+
+txtOutputExt := g1.AddText("x+10 yp+5", "Output Extension:")
+edtOutputExt := g1.AddEdit("x+10 yp-5", "wav")
 
 btnAdd := g1.AddButton("xm", "Add &File")
 btnAdd.OnEvent("Click", AddFiles)
@@ -60,14 +57,14 @@ btnRemove.OnEvent("Click", RemoveSelected)
 btnConvert := g1.AddButton("x+10 Disabled", "&Convert")
 btnConvert.OnEvent("Click", ConvertFiles)
 
-btnExit := g1.AddButton("x+300", "&Close")
+btnExit := g1.AddButton("x+300", "&Exit")
 btnExit.OnEvent("Click", g1Close)
 
-; --- Status Bar ---
-SB := g1.AddStatusBar()
-SB.SetText("You can drag and drop files.")
+; --- Status Bar -------
+SB1 := g1.AddStatusBar()
+SB1.SetText("You can drag and drop files.")
 
-; --- Events ---
+; --- Events ------
 g1.OnEvent("DropFiles", DropFiles) ; File drag and drop
 g1.OnEvent("Size", g1Size) ; Resize event
 g1.OnEvent("Close", g1Close) ; Close event
@@ -76,15 +73,15 @@ g1.OnEvent("Close", g1Close) ; Close event
 fileMenu := Menu() ; Main menu
 AddMenuItems(fileMenu)
 fileMenu.Add() ; Separator
-fileMenu.Add("&Exit", g1Close)
+fileMenu.Add("&Exit`tAlt+F4", g1Close)
 rcMenu := Menu() ; Context menu
 AddMenuItems(rcMenu)
 helpMenu := Menu() ; Help menu
 helpMenu.Add("&About", About)
-Menus := MenuBar() ; Menu bar
-Menus.Add("&File", fileMenu)
-Menus.Add("&Help", helpMenu)
-g1.MenuBar := Menus
+mnuBar := MenuBar() ; Menu bar
+mnuBar.Add("&File", fileMenu)
+mnuBar.Add("&Help", helpMenu)
+g1.MenuBar := mnuBar
 
 ; --------- Status gui -----------------------
 g2 := Gui("+Resize", "Conversion Status") ; Status window
@@ -98,7 +95,6 @@ btnOK.OnEvent("Click", g2btnCancelCloseClick)
 SB2 := g2.AddStatusBar()
 g2.OnEvent("Size", g2Size)
 g2.OnEvent("Close", g2Close) ; Close event
-;g2.Show(" w" g2Width " h" g2Height)
 ;--------------------------------------------
 
 ; --- Hotkeys ---
@@ -106,8 +102,8 @@ g2.OnEvent("Close", g2Close) ; Close event
 Del:: RemoveSelected()
 Insert:: AddFiles()
 ^Enter:: ConvertFiles()
-^a::SelectAll(true)
-Esc::SelectAll(false)
+^a:: SelectAll(true)
+Esc:: SelectAll(false)
 #HotIf
 
 ; ---- Main program start -------------------
@@ -138,10 +134,10 @@ UpdateButtons(*) { ; Update the state of buttons based on the ListView selection
 ; FFmpeg path selection
 ; This function allows the user to select the FFmpeg executable file.
 BrowseFFmpeg(*) {
-  g1.Opt("+OwnDialogs") 
+  g1.Opt("+OwnDialogs")
   if selectedFile := FileSelect(1, FFMpegPath, "Select FFmpeg", "FFmpeg (ffmpeg.exe)") {
     if FileExist(selectedFile) {
-      FFmpegEdit.Value := selectedFile
+      edtFFmpeg.Value := selectedFile
     } else {
       MsgBox("The selected FFmpeg file could not be found.", "Error", "Icon!")
     }
@@ -234,7 +230,7 @@ g2btnCancelCloseClick(*) {
   g2Close()
 }
 
-g2Close(*){
+g2Close(*) {
   cancelConvert := false
   btnOK.Text := "Cancel"
   LV2.Delete() ; Clear the status ListView
@@ -246,7 +242,7 @@ g2Close(*){
 ; Converts files using FFmpeg based on the selected parameters.
 ConvertFiles(*) {
   global cancelConvert
-  ffmpegPath := Trim(FFmpegEdit.Text)
+  ffmpegPath := Trim(edtFFmpeg.Text)
   if !FileExist(ffmpegPath) {
     MsgBox("ffmpeg.exe not found. Please specify a valid FFmpeg path.", "Error", "Icon!")
     return
@@ -259,11 +255,11 @@ ConvertFiles(*) {
   convertedCount := 0
   failedCount := 0
   totalFiles := LV1.GetCount()
-  ext := Trim(outputExtEdit.Text)
+  ext := Trim(edtOutputExt.Text)
   if !RegExMatch(ext, "^\.") {
     ext := "." ext
   }
-  parameter := " " Trim(parameterEdit.Text) " "
+  parameter := " " Trim(edtFFmpegParams.Text) " "
 
   loop totalFiles { ; Loop through all files in the ListView
     if cancelConvert {
@@ -275,32 +271,32 @@ ConvertFiles(*) {
     LV1.Modify(0, "-Select") ; Deselect all items
     LV1.Modify(A_Index, "Select Vis") ; Select the current item
 
-    fileDir := LV1.GetText(A_Index, 1)
-    fileName := LV1.GetText(A_Index, 2)
-    SplitPath(fileName, , , , &fName)
+    fileDir := LV1.GetText(A_Index, 1) ; Get the directory of the file
+    fileName := LV1.GetText(A_Index, 2) ; Get the file name
+    SplitPath(fileName, , , , &fName) ; Split the file name to get the base name
 
-    inputFile := fileDir "\" fileName
-    outputFile := fileDir "\" fName ext
+    inputFile := fileDir "\" fileName ; Full path of the input file
+    outputFile := fileDir "\" fName ext ; Full path of the output file
 
     UpdateProgress(A_Index, totalFiles)
     if FileExist(inputFile) { ; Check if the input file exists
       if !FileExist(outputFile) {
         cmd := '"' ffmpegPath '" -i "' inputFile '"' parameter '"' outputFile '"'
-        rowIndex := LV2.GetCount()
         LV2.Add("", inputFile, "Converting...")
-        LV2.Modify(rowIndex, "Select Vis")
+        row := LV2.GetCount()
+        LV2.Modify(0, "-Select") ; Deselect all items
+        LV2.Modify(row, "Select Vis") ; Select the current item
         try {
           RunWait(cmd, , "Hide")
-          rowIndex := LV2.GetCount()
           if FileExist(outputFile) {
-            LV2.Modify(rowIndex, , , "Converted", fName ext)
+            LV2.Modify(row, , , "Converted", fName ext)
             convertedCount++
           } else {
-            LV2.Modify(rowIndex, , , "ERROR: Conversion failed")
+            LV2.Modify(row, , , "ERROR: Conversion failed")
             failedCount++
           }
         } catch as err {
-          LV2.Modify(rowIndex, , , "ERROR: " err.message)
+          LV2.Modify(row, , , "ERROR: " err.message)
           failedCount++
         }
       } else {
@@ -311,7 +307,7 @@ ConvertFiles(*) {
       failedCount++
     }
   }
-  SB2.SetText(Format("Process complete. {1} files converted out of {2}, {3} failed.", totalFiles, convertedCount, failedCount))
+  SB2.SetText(Format("Process complete. Total files: {1}, Converted files: {2}, Failed: {3}", totalFiles, convertedCount, failedCount))
   btnOK.Text := "Close"
 }
 
@@ -321,7 +317,7 @@ SB1Message(dupeCount) {
     txt := dupeCount " files were not added because they are already in the list."
   }
   txt .= " Total file count: " LV1.GetCount()
-  SB.SetText(txt)
+  SB1.SetText(txt)
 }
 
 ; ListView resizing function
@@ -344,15 +340,17 @@ g1Size(gObj, MinMax, Width, Height) {
   ; Adjust ListView to new size
   h := ResizeListView(LV1, Width, Height, 140)
 
-  FFmpegTxt.Move(, margin + h + 15)
-  FFmpegEdit.Move(, margin + h + 10)
+  txtFFmpeg.Move(, margin + h + 15)
+  edtFFmpeg.Move(, margin + h + 10)
   btnBrowse.Move(, margin + h + 10)
 
-  parameterTxt.Move(, margin + h + 50)
-  parameterEdit.Move(, margin + h + 45)
+  txtFFmpegParams.Move(, margin + h + 50)
+  edtFFmpegParams.Move(, margin + h + 45)
 
-  outputExtTxt.Move(, margin + h + 50)
-  outputExtEdit.Move(, margin + h + 45)
+  btnFFmpegHlp.Move(, margin + h + 45)
+
+  txtOutputExt.Move(, margin + h + 50)
+  edtOutputExt.Move(, margin + h + 45)
 
   btnAdd.Move(, margin + h + 75)
   btnRemove.Move(, margin + h + 75)
@@ -396,7 +394,7 @@ UpdateProgress(index, totalFiles) {
 
 ; About dialog
 About(*) {
-MsgBox(Format("
+  MsgBox(Format("
 (
 {1}
 {2}
@@ -409,6 +407,6 @@ akcansoft.blogspot.com
 mesutakcan.blogspot.com
 github.com/akcansoft
 youtube.com/mesutakcan
-)" ,
-appName, appVer), "About", "Owner" g1.Hwnd)
+)",
+  appName, appVer), "About", "Owner" g1.Hwnd)
 }
