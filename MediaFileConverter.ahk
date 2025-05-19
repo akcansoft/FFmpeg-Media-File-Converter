@@ -8,8 +8,11 @@ youtube.com/mesutakcan
 mesutakcan.blogspot.com
 github.com/akcansoft
 =============================
-v1.0 R16
-06/04/2025
+v1.0 R17
+19/05/2025
+
+New Features:
+- Added support for command line parameters
 =============================
 */
 #Requires AutoHotkey v2.0
@@ -24,7 +27,7 @@ appName := "FFmpeg Media File Converter"
 appVer := "v1.0"
 
 ; ---- Main gui ------------------
-g1 := Gui("+Resize", appName)
+g1 := Gui("+Resize +MinSize500x300", appName)
 g1.MarginX := g1.MarginY := margin
 
 ; --- ListView ---
@@ -105,6 +108,24 @@ Insert:: AddFiles()
 ^a:: SelectAll(true)
 Esc:: SelectAll(false)
 #HotIf
+
+; --- Add files from command line parameters ---
+if A_Args.Length {
+  duplicateCount := 0
+  for f in A_Args {
+    if DirExist(f) {
+      Loop Files, f "\*.*" {
+        if !AddFileToListView(A_LoopFileFullPath)
+          duplicateCount++
+      }
+    } else {
+      if !AddFileToListView(f)
+        duplicateCount++
+    }
+  }
+  SB1Message(duplicateCount)
+  UpdateButtons()
+}
 
 ; ---- Main program start -------------------
 g1.Show("w" g1Dim.w " h" g1Dim.h)
@@ -278,6 +299,7 @@ ConvertFiles(*) {
     inputFile := fileDir "\" fileName ; Full path of the input file
     outputFile := fileDir "\" fName ext ; Full path of the output file
 
+    SB2.SetText(inputFile)
     UpdateProgress(A_Index, totalFiles)
     if FileExist(inputFile) { ; Check if the input file exists
       if !FileExist(outputFile) {
