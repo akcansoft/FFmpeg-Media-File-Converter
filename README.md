@@ -14,6 +14,7 @@ FFmpeg Media File Converter is an open-source application developed with AutoHot
 - **Output Format Selection**: Choose the desired output file extension.
 - **Conversion Progress Monitoring**: View the status of each file and overall progress in a dedicated status window.
 - **Cancel Ongoing Conversions**: Stop the conversion process at any time.
+- **Command line parameters** : Allows users to add files for conversion by passing them as command line arguments when launching the application.
 
 ## Requirements
 
